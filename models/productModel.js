@@ -34,8 +34,12 @@ const productSchema = new mongoose.Schema(
     shipping: {
       type: Boolean,
     },
+    size: {
+      type: String, 
+    },
   },
   { timestamps: true }
 );
 
 export default mongoose.model("Products", productSchema);
+
