@@ -58,13 +58,38 @@ export const updateCategoryController = async (req, res) => {
 };
 
 // get all cat
-export const categoryControlller = async (req, res) => {
+// get all categories with filtering options
+export const categoryController = async (req, res) => {
   try {
-    const category = await categoryModel.find({});
+    const { priceRange, sizes, categories } = req.body;
+    let categoryFilters = {};
+
+    // If priceRange is provided, add price filter to category query
+    if (priceRange && priceRange.length === 2) {
+      categoryFilters = {
+        ...categoryFilters,
+        minPrice: { $lte: priceRange[1] },
+        maxPrice: { $gte: priceRange[0] },
+      };
+    }
+
+    // If sizes are provided, add size filter to category query
+    if (sizes && sizes.length > 0) {
+      categoryFilters = { ...categoryFilters, size: { $in: sizes } };
+    }
+
+    // If categories are provided, add category filter to category query
+    if (categories && categories.length > 0) {
+      categoryFilters = { ...categoryFilters, _id: { $in: categories } };
+    }
+
+    // Fetch categories based on the combined filters
+    const categories = await categoryModel.find(categoryFilters);
+
     res.status(200).send({
       success: true,
       message: "All Categories List",
-      category,
+      categories,
     });
   } catch (error) {
     console.log(error);
@@ -75,6 +100,7 @@ export const categoryControlller = async (req, res) => {
     });
   }
 };
+
 
 // single category
 export const singleCategoryController = async (req, res) => {
